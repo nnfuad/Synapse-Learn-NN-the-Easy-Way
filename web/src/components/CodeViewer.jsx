@@ -427,6 +427,113 @@ class RosenbrockLandscape:
         return input_tensor + x  # Residual identity shortcut`
   },
 
+  // Module 05 Snippets
+  lstm_scratch: {
+    module: '05',
+    title: "LSTM Cell & BPTT from Pure NumPy",
+    language: "Python (NumPy)",
+    path: "python/module05_sequential_processing_and_attention/lstm_scratch.py",
+    description: "Hochreiter & Schmidhuber 1997 Long Short-Term Memory: Constant Error Carousel highway and analytical backward pass.",
+    code: `class LSTMCellScratch:
+    def __init__(self, input_size: int, hidden_size: int):
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.W = np.random.randn(hidden_size * 4, input_size + hidden_size) * 0.01
+        self.b = np.zeros((hidden_size * 4, 1))
+
+    def forward(self, x_t: np.ndarray, h_prev: np.ndarray, c_prev: np.ndarray):
+        concat = np.vstack((x_t, h_prev))
+        gates = np.dot(self.W, concat) + self.b
+        
+        H = self.hidden_size
+        f_t = sigmoid(gates[0:H])
+        i_t = sigmoid(gates[H:2*H])
+        c_tilde = np.tanh(gates[2*H:3*H])
+        o_t = sigmoid(gates[3*H:4*H])
+        
+        # The Constant Error Carousel Highway:
+        c_t = f_t * c_prev + i_t * c_tilde
+        h_t = o_t * np.tanh(c_t)
+        return h_t, c_t`
+  },
+  bahdanau_pytorch: {
+    module: '05',
+    title: "Bahdanau Additive Attention in PyTorch",
+    language: "PyTorch 2.x",
+    path: "python/module05_sequential_processing_and_attention/bahdanau_attention_pytorch.py",
+    description: "Bahdanau et al. 2014 Additive Attention mechanism for breaking the Seq2Seq fixed-length bottleneck.",
+    code: `class BahdanauAttention(nn.Module):
+    def __init__(self, enc_dim: int, dec_dim: int, attn_dim: int):
+        super().__init__()
+        self.W_a = nn.Linear(dec_dim, attn_dim, bias=False)
+        self.U_a = nn.Linear(enc_dim, attn_dim, bias=False)
+        self.v_a = nn.Linear(attn_dim, 1, bias=False)
+
+    def forward(self, dec_hidden: torch.Tensor, enc_outputs: torch.Tensor):
+        score = self.v_a(torch.tanh(self.W_a(dec_hidden).unsqueeze(1) + self.U_a(enc_outputs)))
+        attn_weights = F.softmax(score, dim=1)
+        context = torch.sum(attn_weights * enc_outputs, dim=1)
+        return context, attn_weights`
+  },
+
+  // Module 06 Snippets
+  attention_scratch: {
+    module: '06',
+    title: "Scaled Dot-Product Multi-Head Attention",
+    language: "Python (NumPy)",
+    path: "python/module06_transformers_and_attention/attention_scratch.py",
+    description: "Vaswani et al. 2017: Scaled dot-product attention with 1/sqrt(d_k) variance scaling and causal masking.",
+    code: `def scaled_dot_product_attention_scratch(Q, K, V, mask=None):
+    d_k = Q.shape[-1]
+    scores = np.matmul(Q, np.swapaxes(K, -1, -2)) / np.sqrt(d_k)
+    
+    if mask is not None:
+        scores = np.where(mask == 0, -1e9, scores)
+        
+    exp_scores = np.exp(scores - np.max(scores, axis=-1, keepdims=True))
+    attn_weights = exp_scores / np.sum(exp_scores, axis=-1, keepdims=True)
+    output = np.matmul(attn_weights, V)
+    return output, attn_weights`
+  },
+  rope_kv_cache: {
+    module: '06',
+    title: "RoPE Rotary Embeddings & KV-Cache",
+    language: "PyTorch 2.x",
+    path: "python/module06_transformers_and_attention/rope_and_kv_cache.py",
+    description: "Su et al. 2021 Rotary Position Embeddings 2D rotation and autoregressive Key-Value Cache buffer.",
+    code: `def apply_rotary_pos_emb(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor):
+    x1 = x[..., 0::2]
+    x2 = x[..., 1::2]
+    x_rotated = torch.stack((-x2, x1), dim=-1).flatten(-2)
+    return (x * cos) + (x_rotated * sin)
+
+class KVCache:
+    def __init__(self, max_batch_size: int, max_seq_len: int, n_heads: int, head_dim: int):
+        self.k = torch.zeros(max_batch_size, n_heads, max_seq_len, head_dim)
+        self.v = torch.zeros(max_batch_size, n_heads, max_seq_len, head_dim)
+        self.seq_len = 0`
+  },
+  transformer_sota: {
+    module: '06',
+    title: "SOTA Transformer Block (FlashAttention + SwiGLU)",
+    language: "PyTorch 2.x",
+    path: "python/module06_transformers_and_attention/transformer_block_pytorch.py",
+    description: "Modern Transformer Decoder Block with Pre-LN RMSNorm, FlashAttention-2 SDPA, and SwiGLU MLP.",
+    code: `class TransformerDecoderBlock(nn.Module):
+    def __init__(self, d_model: int, n_heads: int):
+        super().__init__()
+        self.attn_norm = RMSNorm(d_model)
+        self.mlp_norm = RMSNorm(d_model)
+        self.swiglu = SwiGLU(d_model, hidden_dim=int(4 * d_model * 2 / 3))
+
+    def forward(self, x: torch.Tensor, is_causal: bool = True):
+        norm_x = self.attn_norm(x)
+        attn_out = F.scaled_dot_product_attention(norm_x, norm_x, norm_x, is_causal=is_causal)
+        x = x + attn_out
+        x = x + self.swiglu(self.mlp_norm(x))
+        return x`
+  },
+
   // Module 07 Snippets
   diffusion_ddpm: {
     module: '07',

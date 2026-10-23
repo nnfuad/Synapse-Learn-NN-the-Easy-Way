@@ -89,6 +89,106 @@ const MODULE_QUESTIONS = {
     }
   ],
 
+  '03': [
+    {
+      id: 301,
+      question: "Why did Santurkar et al. (NeurIPS 2018) debunk the original 'Internal Covariate Shift' explanation for Batch Normalization?",
+      options: [
+        { text: "BatchNorm actually increases internal covariate shift.", correct: false },
+        { text: "Even when intentionally injecting distributional shift noise, BatchNorm trains just as effectively because its true superpower is smoothing the loss landscape (making loss and gradients Lipschitz continuous).", correct: true },
+        { text: "BatchNorm is only useful for convolutional networks, not MLPs.", correct: false },
+        { text: "Calculus does not apply to normalized distributions.", correct: false },
+      ],
+      explanation: "Brilliant! Santurkar et al. proved that BatchNorm works not by stabilizing distribution shifts, but by making the loss landscape significantly smoother and predictive, allowing much larger learning rates."
+    },
+    {
+      id: 302,
+      question: "Why have modern Foundation LLMs (LLaMA 3, Mistral, Gemma, DeepSeek) universally replaced LayerNorm with RMSNorm?",
+      options: [
+        { text: "RMSNorm requires 100x more memory.", correct: false },
+        { text: "Research discovered mean-centering is computationally redundant; scaling invariance alone stabilizes gradients, saving 10-50% computational overhead.", correct: true },
+        { text: "RMSNorm eliminates the need for token embeddings.", correct: false },
+        { text: "PyTorch 1.0 could not compile LayerNorm.", correct: false },
+      ],
+      explanation: "Spot on! Zhang & Sennrich (2019) demonstrated that subtracting the mean contributes virtually nothing to training stability. RMSNorm simply scales by the root mean square, discarding mean subtraction and bias additions."
+    }
+  ],
+
+  '04': [
+    {
+      id: 401,
+      question: "Why does stacking two 3x3 convolutional layers (as popularized by VGG-16) outperform a single 5x5 convolution?",
+      options: [
+        { text: "3x3 convolutions run only on CPU, saving GPU power.", correct: false },
+        { text: "Both span an identical 5x5 receptive field, but two 3x3 convs use 18·C² parameters instead of 25·C² (28% fewer parameters) while injecting two non-linear activations.", correct: true },
+        { text: "5x5 convolutions cannot detect vertical edges.", correct: false },
+        { text: "Two 3x3 convolutions eliminate all padding requirements.", correct: false },
+      ],
+      explanation: "Exactly! Two consecutive 3x3 filters have a receptive field of 3 + (3-1) = 5. You get the exact same spatial coverage with 28% fewer weights and double the non-linear decision capacity."
+    },
+    {
+      id: 402,
+      question: "In ResNet (He et al. 2015), how does the residual identity connection H(x) = F(x) + x mathematically conquer the deep degradation problem?",
+      options: [
+        { text: "It doubles the resolution of input images.", correct: false },
+        { text: "The backward gradient contains an unhindered +1 identity term (∂L/∂x = ∂L/∂H · [I + ∂F/∂x]), allowing error signals to flow back directly across hundreds of layers with zero attenuation.", correct: true },
+        { text: "It converts all floating-point numbers to integers.", correct: false },
+        { text: "It bypasses GPU memory limits.", correct: false },
+      ],
+      explanation: "Masterful! Because of the addition +x, the gradient always carries a clean identity factor +1. Even if the residual block F(x) has small weights, the gradient never vanishes!"
+    }
+  ],
+
+  '05': [
+    {
+      id: 501,
+      question: "Why does the LSTM Constant Error Carousel (CEC) prevent the vanishing gradient catastrophe that crippled vanilla RNNs?",
+      options: [
+        { text: "It uses larger learning rates.", correct: false },
+        { text: "The cell state updates additively (c_t = f_t · c_{t-1} + i_t · c̃_t), meaning the gradient flow ∂c_t / ∂c_{t-1} = f_t (approx 1.0 when forget gate is open), bypassing exponential matrix decay.", correct: true },
+        { text: "It skips all matrix multiplications.", correct: false },
+        { text: "LSTMs only process the first 5 words of any sentence.", correct: false },
+      ],
+      explanation: "Bullseye! In vanilla RNNs, backpropagating through time repeatedly multiplies by W_hh, causing exponential decay (e.g. 0.85^50 ≈ 0.0003). In an LSTM, the cell state is a linear highway where error signals travel undiminished."
+    },
+    {
+      id: 502,
+      question: "What critical architectural bottleneck did Bahdanau Additive Attention (2014) resolve in Seq2Seq models?",
+      options: [
+        { text: "It eliminated the need for training data.", correct: false },
+        { text: "Traditional Seq2Seq compressed an entire 50-word sentence into a single fixed-length vector h_T; Bahdanau attention allows the decoder to dynamically query and spotlight all source words.", correct: true },
+        { text: "It allowed recurrent networks to run without activations.", correct: false },
+        { text: "It translated text into binary ASCII directly.", correct: false },
+      ],
+      explanation: "Outstanding! Compressing a complex sentence into a single vector created a memory bottleneck. Bahdanau attention acts as an associative searchlight, letting the decoder focus on relevant source words at every decoding step."
+    }
+  ],
+
+  '06': [
+    {
+      id: 601,
+      question: "Why must the dot product Q · K^T be scaled by 1 / sqrt(d_k) in Scaled Dot-Product Attention (Vaswani et al. 2017)?",
+      options: [
+        { text: "To make the matrix square.", correct: false },
+        { text: "For large dimensions d_k, the dot product variance scales to d_k, pushing the Softmax function into flat saturation zones with near-zero gradients.", correct: true },
+        { text: "Because square roots run faster on tensor cores.", correct: false },
+        { text: "To prevent memory leaks in PyTorch.", correct: false },
+      ],
+      explanation: "Precisely! If Q and K have mean 0 and variance 1, their dot product has variance d_k. When d_k = 128, values can reach ±30, causing Softmax to output 1.0 and 0.0 with virtually zero gradient flow. Dividing by sqrt(d_k) restores unit variance."
+    },
+    {
+      id: 602,
+      question: "How does Rotary Position Embedding (RoPE) mathematically encode relative token distance without absolute position lookup tables?",
+      options: [
+        { text: "By adding sinusoidal waves directly to the word embeddings.", correct: false },
+        { text: "By rotating query and key vector pairs in 2D coordinate planes by angle m·θ; the dot product <R_m q, R_n k> naturally collapses into a function depending strictly on relative distance (n - m).", correct: true },
+        { text: "By measuring the character count of each word.", correct: false },
+        { text: "By sorting all tokens alphabetically.", correct: false },
+      ],
+      explanation: "Brilliant! RoPE uses complex rotation matrices: R_m^T R_n = R_{n-m}. This guarantees that the attention dot product depends only on how far apart two tokens are, not where they sit in absolute sequence space!"
+    }
+  ],
+
   '07': [
     {
       id: 1,
