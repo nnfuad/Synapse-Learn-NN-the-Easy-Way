@@ -1,5 +1,6 @@
 # 🧠 Synapse: Learn Neural Networks the Easy Way
 ### *From Absolute Zero to State-of-the-Art AI Research (1943 → 2026)*
+by  @nnfuad
 
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![NumPy](https://img.shields.io/badge/NumPy-from--scratch-013243?logo=numpy&logoColor=white)](https://numpy.org/)
