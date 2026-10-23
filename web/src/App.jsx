@@ -19,7 +19,7 @@ export default function App() {
       currentPage={route.page}
       onNavigate={navigate}
     >
-      {route.page === 'dashboard' && <DashboardPage onNavigate={navigate} />}
+      {(route.page === 'home' || route.page === 'dashboard') && <DashboardPage onNavigate={navigate} />}
       {route.page === 'roadmap' && <RoadmapPage onNavigate={navigate} />}
       {route.page === 'module' && (
         <ModulePage

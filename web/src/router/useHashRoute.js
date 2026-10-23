@@ -2,29 +2,38 @@ import { useState, useEffect } from 'react';
 
 /**
  * Lightweight, robust URL Hash Router for Synapse.
- * Supports:
- *   - '#/' or '' -> Defaults to '#/module/00' (or dashboard)
- *   - '#/module/00' ... '#/module/09'
- *   - '#/roadmap'
- *   - '#/dashboard'
+ * Defaults to Home Page ('#/' or empty) upon opening the application.
+ *
+ * Supported Routes:
+ *   - '' or '#/' or '#/home' or '#/dashboard' -> Home Page
+ *   - '#/module/00' ... '#/module/09'        -> Dedicated Module Pages
+ *   - '#/roadmap'                            -> 80-Year Timeline Explorer
  */
 export function useHashRoute() {
   const parseHash = () => {
-    const rawHash = window.location.hash.replace(/^#\/?/, '') || 'module/00';
-    const parts = rawHash.split('/');
-    const page = parts[0] || 'module';
-    const id = parts[1] || '00';
-    return { raw: rawHash, page, id };
+    const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+
+    if (!rawHash || rawHash === 'home' || rawHash === 'dashboard') {
+      return { raw: rawHash, page: 'home', id: null };
+    }
+
+    if (rawHash === 'roadmap') {
+      return { raw: rawHash, page: 'roadmap', id: null };
+    }
+
+    if (rawHash.startsWith('module/')) {
+      const parts = rawHash.split('/');
+      const id = parts[1] || '00';
+      return { raw: rawHash, page: 'module', id };
+    }
+
+    // Default fallback to Home
+    return { raw: rawHash, page: 'home', id: null };
   };
 
   const [route, setRoute] = useState(parseHash);
 
   useEffect(() => {
-    // If user opens root http://localhost:5173/ without hash, redirect to #/module/00
-    if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
-      window.location.hash = '#/module/00';
-    }
-
     const handleHashChange = () => {
       setRoute(parseHash());
     };
@@ -34,7 +43,11 @@ export function useHashRoute() {
   }, []);
 
   const navigate = (path) => {
-    window.location.hash = path.startsWith('#') ? path : `#/${path.replace(/^\//, '')}`;
+    if (!path || path === 'home' || path === 'dashboard' || path === '/') {
+      window.location.hash = '#/';
+    } else {
+      window.location.hash = path.startsWith('#') ? path : `#/${path.replace(/^\//, '')}`;
+    }
   };
 
   return { route, navigate };

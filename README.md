@@ -62,11 +62,14 @@ Once you understand the raw math, open the companion PyTorch script:
 Anyone can fire up the full graphical platform on their local machine in under 60 seconds:
 
 ```bash
-# 1. Clone the repository
+# Clone the repository (or navigate to your existing directory)
 git clone https://github.com/nnfuad/Synapse-Learn-NN-the-Easy-Way.git
 cd Synapse-Learn-NN-the-Easy-Way
 
-# 2. Launch the interactive web platform
+# If you already have the directory cloned, ensure you have the latest updates:
+# git pull origin main
+
+# Launch the interactive web platform
 cd web
 npm install
 npm run dev

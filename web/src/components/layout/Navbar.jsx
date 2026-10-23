@@ -47,10 +47,11 @@ export default function Navbar({ currentModuleId, currentPage, onOpenMobileSideb
         {/* Module Fast Selector Dropdown */}
         <div className="relative">
           <select
-            value={currentModuleId}
-            onChange={(e) => onNavigate(`module/${e.target.value}`)}
+            value={currentPage === 'module' ? currentModuleId : ''}
+            onChange={(e) => e.target.value && onNavigate(`module/${e.target.value}`)}
             className="bg-slate-900 border border-slate-700/80 hover:border-cyan-500/60 text-xs font-bold text-white px-3 py-1.5 rounded-xl appearance-none pr-7 cursor-pointer transition shadow-sm"
           >
+            <option value="" disabled>Jump to Stage...</option>
             {MODULES_LIST.map((m) => (
               <option key={m.id} value={m.id} className="bg-slate-900 text-slate-200">
                 Stage {m.number}: {m.title}

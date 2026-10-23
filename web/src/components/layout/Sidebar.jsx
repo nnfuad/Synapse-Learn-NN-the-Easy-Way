@@ -79,7 +79,7 @@ export default function Sidebar({ currentModuleId, currentPage, onNavigate, isMo
           <button
             onClick={() => handleNav('dashboard')}
             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-              currentPage === 'dashboard'
+              currentPage === 'home' || currentPage === 'dashboard'
                 ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm'
                 : 'text-slate-400 hover:text-white hover:bg-slate-900'
             }`}
