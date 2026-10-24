@@ -17,6 +17,7 @@ import {
   Microscope,
 } from 'lucide-react';
 import { MODULES_MAP, MODULES_LIST } from '../data/curriculumData.js';
+import ErrorBoundary from '../components/ErrorBoundary.jsx';
 
 // Visualizers
 import HistoryTimeline from '../components/HistoryTimeline.jsx';
@@ -152,6 +153,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
 
       {/* Main Tab View Content */}
       <section className="space-y-6">
+        <ErrorBoundary key={normId + '-' + activeTab}>
         {/* Module 00 Views */}
         {normId === '00' && (
           <>
@@ -244,6 +246,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
             {activeTab === 'quiz' && <StudentQuiz currentModule="09" />}
           </>
         )}
+        </ErrorBoundary>
       </section>
 
       {/* Chapter Bottom Navigation & Local Terminal Command Helper */}

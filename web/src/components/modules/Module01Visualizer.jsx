@@ -176,8 +176,14 @@ export default function Module01Visualizer() {
 
   // Re-sync inputs when preset changes
   useEffect(() => {
-    setInputs(GRAPH_PRESETS[selectedPresetKey].inputs);
-    setSelectedNodeId(GRAPH_PRESETS[selectedPresetKey].topoOrder[GRAPH_PRESETS[selectedPresetKey].topoOrder.length - 1]);
+    const curPreset = GRAPH_PRESETS[selectedPresetKey];
+    if (curPreset) {
+      setInputs(curPreset.inputs);
+      const built = curPreset.buildGraph(curPreset.inputs);
+      if (built && built.topoOrder && built.topoOrder.length > 0) {
+        setSelectedNodeId(built.topoOrder[built.topoOrder.length - 1]);
+      }
+    }
     setActiveStepIndex(-1);
     setIsAutoPlaying(false);
   }, [selectedPresetKey]);

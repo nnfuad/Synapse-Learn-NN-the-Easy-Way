@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHashRoute } from './router/useHashRoute.js';
 import Layout from './components/layout/Layout.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 // Dedicated Page Views
 import ModulePage from './pages/ModulePage.jsx';
@@ -19,15 +20,17 @@ export default function App() {
       currentPage={route.page}
       onNavigate={navigate}
     >
-      {(route.page === 'home' || route.page === 'dashboard') && <DashboardPage onNavigate={navigate} />}
-      {route.page === 'roadmap' && <RoadmapPage onNavigate={navigate} />}
-      {route.page === 'module' && (
-        <ModulePage
-          key={route.id || '00'}
-          moduleId={route.id || '00'}
-          onNavigate={navigate}
-        />
-      )}
+      <ErrorBoundary key={route.page + (route.id || '')}>
+        {(route.page === 'home' || route.page === 'dashboard') && <DashboardPage onNavigate={navigate} />}
+        {route.page === 'roadmap' && <RoadmapPage onNavigate={navigate} />}
+        {route.page === 'module' && (
+          <ModulePage
+            key={route.id || '00'}
+            moduleId={route.id || '00'}
+            onNavigate={navigate}
+          />
+        )}
+      </ErrorBoundary>
     </Layout>
   );
 }

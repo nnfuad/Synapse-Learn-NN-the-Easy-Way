@@ -381,7 +381,7 @@ export default function Module06Visualizer() {
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
             <h3 className="text-base font-bold text-white flex items-center gap-2 mb-4">
               <Layers className="w-4 h-4 text-cyan-400" />
-              The Matrix Tile Pipeline ($Q \times K^\top \rightarrow \text{Softmax} \rightarrow \times V$)
+              The Matrix Tile Pipeline ($Q \times K^\top \rightarrow \text{'{Softmax}'} \rightarrow \times V$)
             </h3>
 
             <div className="overflow-x-auto">
