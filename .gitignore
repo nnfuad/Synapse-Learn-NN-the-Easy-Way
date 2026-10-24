@@ -23,8 +23,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environments
+# Virtual Environments & Environment files
 .env
+.env.*
+.env.local
 .venv
 env/
 venv/
@@ -48,6 +50,9 @@ yarn-debug.log*
 yarn-error.log*
 web/node_modules/
 web/dist/
+
+# Vercel
+.vercel/
 
 # macOS system files & AppleDouble resource forks
 .DS_Store

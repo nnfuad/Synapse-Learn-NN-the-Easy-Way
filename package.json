@@ -1,0 +1,10 @@
+{
+  "name": "synapse-neural-explainer-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm run build --prefix web",
+    "dev": "npm run dev --prefix web",
+    "preview": "npm run preview --prefix web"
+  }
+}

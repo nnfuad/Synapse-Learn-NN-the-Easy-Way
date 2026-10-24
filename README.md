@@ -7,9 +7,12 @@ by  @nnfuad
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://synapse-neural-explainer.vercel.app)
 [![Tests](https://img.shields.io/badge/pytest-79%20passed-10B981?logo=pytest&logoColor=white)](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/conftest.py)
 
 Welcome to **Synapse**, an open-source, interactive, graphical learning platform designed to demystify neural networks for everyone. Whether you are a high school student with zero calculus background or a graduate researcher preparing to train modern Foundation Models, **Synapse** gives you the intuitive mental models, mathematical rigor, and production code needed to achieve true mastery.
+
+🌐 **Live Demo Deployed on Vercel**: [**synapse-neural-explainer.vercel.app**](https://synapse-neural-explainer.vercel.app)
 
 ---
 
@@ -57,9 +60,15 @@ Once you understand the raw math, open the companion PyTorch script:
 
 ---
 
-## ⚡ Quick Start: Run the Interactive Web Explainer Locally
+## ⚡ Quick Start: Access the Interactive Web Explainer
 
-Anyone can fire up the full graphical platform on their local machine in under 60 seconds:
+### Option 1: Instant Cloud Access (No Setup Needed)
+Launch the fully deployed, interactive web explainer directly in your browser:
+👉 **[https://synapse-neural-explainer.vercel.app](https://synapse-neural-explainer.vercel.app)**
+
+---
+
+### Option 2: Run Locally (Under 60 Seconds)
 
 ```bash
 # Clone the repository (or navigate to your existing directory)
