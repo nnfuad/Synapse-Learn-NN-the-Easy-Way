@@ -37,20 +37,27 @@ import Module08Visualizer from '../components/modules/Module08Visualizer.jsx';
 import Module09Visualizer from '../components/modules/Module09Visualizer.jsx';
 
 export default function ModulePage({ moduleId, onNavigate }) {
-  const mod = MODULES_MAP[moduleId] || MODULES_MAP['00'];
+  // Normalize module ID to 2-digit canonical format (e.g. '0' -> '00', '1' -> '01')
+  const cleanId = String(moduleId || '00').replace(/^module\/?/i, '');
+  const parsedNum = parseInt(cleanId, 10);
+  const normId = !isNaN(parsedNum) && parsedNum >= 0 && parsedNum <= 9
+    ? String(parsedNum).padStart(2, '0')
+    : '00';
+
+  const mod = MODULES_MAP[normId] || MODULES_MAP['00'];
 
   // Default tab based on module
   const getDefaultTab = (mId) => (mId === '00' ? 'perceptron' : 'visualizer');
-  const [activeTab, setActiveTab] = useState(() => getDefaultTab(moduleId));
+  const [activeTab, setActiveTab] = useState(() => getDefaultTab(normId));
 
-  // Reset tab when moduleId changes
+  // Reset tab when normId changes
   useEffect(() => {
-    setActiveTab(getDefaultTab(moduleId));
-  }, [moduleId]);
+    setActiveTab(getDefaultTab(normId));
+  }, [normId]);
 
   // Determine available tabs
   const tabs =
-    moduleId === '00'
+    normId === '00'
       ? [
           { id: 'perceptron', label: '1957 Perceptron 2D', icon: Brain, color: 'text-emerald-400' },
           { id: 'mcculloch', label: '1943 McCulloch-Pitts', icon: Cpu, color: 'text-cyan-400' },
@@ -66,7 +73,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         ];
 
   // Prev / Next Module calculations
-  const currentIndex = MODULES_LIST.findIndex((m) => m.id === moduleId);
+  const currentIndex = MODULES_LIST.findIndex((m) => m.id === normId);
   const prevModule = currentIndex > 0 ? MODULES_LIST[currentIndex - 1] : null;
   const nextModule = currentIndex < MODULES_LIST.length - 1 ? MODULES_LIST[currentIndex + 1] : null;
 
@@ -146,7 +153,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
       {/* Main Tab View Content */}
       <section className="space-y-6">
         {/* Module 00 Views */}
-        {moduleId === '00' && (
+        {normId === '00' && (
           <>
             {activeTab === 'perceptron' && <PerceptronPlayground />}
             {activeTab === 'mcculloch' && <McCullochPittsSim />}
@@ -158,7 +165,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 01 Views */}
-        {moduleId === '01' && (
+        {normId === '01' && (
           <>
             {activeTab === 'visualizer' && <Module01Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="01" />}
@@ -167,7 +174,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 02 Views */}
-        {moduleId === '02' && (
+        {normId === '02' && (
           <>
             {activeTab === 'visualizer' && <Module02Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="02" />}
@@ -176,7 +183,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 03 Views */}
-        {moduleId === '03' && (
+        {normId === '03' && (
           <>
             {activeTab === 'visualizer' && <Module03Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="03" />}
@@ -185,7 +192,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 04 Views */}
-        {moduleId === '04' && (
+        {normId === '04' && (
           <>
             {activeTab === 'visualizer' && <Module04Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="04" />}
@@ -194,7 +201,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 05 Views */}
-        {moduleId === '05' && (
+        {normId === '05' && (
           <>
             {activeTab === 'visualizer' && <Module05Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="05" />}
@@ -203,7 +210,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 06 Views */}
-        {moduleId === '06' && (
+        {normId === '06' && (
           <>
             {activeTab === 'visualizer' && <Module06Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="06" />}
@@ -212,7 +219,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 07 Views */}
-        {moduleId === '07' && (
+        {normId === '07' && (
           <>
             {activeTab === 'visualizer' && <Module07Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="07" />}
@@ -221,7 +228,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 08 Views */}
-        {moduleId === '08' && (
+        {normId === '08' && (
           <>
             {activeTab === 'visualizer' && <Module08Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="08" />}
@@ -230,7 +237,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
         )}
 
         {/* Module 09 Views */}
-        {moduleId === '09' && (
+        {normId === '09' && (
           <>
             {activeTab === 'visualizer' && <Module09Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="09" />}
