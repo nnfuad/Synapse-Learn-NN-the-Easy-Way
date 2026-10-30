@@ -3,8 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "npm run build --prefix web",
-    "dev": "npm run dev --prefix web",
-    "preview": "npm run preview --prefix web"
+    "start": "cd web && npm run dev",
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "preview": "cd web && npm run preview"
   }
 }
