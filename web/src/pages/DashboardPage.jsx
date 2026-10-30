@@ -71,7 +71,7 @@ export default function DashboardPage({ onNavigate }) {
             { step: '02', title: 'Interactive Visualizer', desc: 'Play with sliders, drag coordinates, and watch vectors and hyperplanes move before reading math.' },
             { step: '03', title: 'Scratch Python/NumPy', desc: 'Inspect every arithmetic operation from raw mathematical equations without framework magic.' },
             { step: '04', title: 'Production PyTorch', desc: 'See how frontier research labs write hardware-accelerated, modular production models.' },
-            { step: '05', title: 'Notebooks & Quiz', desc: 'Experiment on custom datasets in Jupyter and validate your mental models with the concept quiz.' },
+            { step: '05', title: 'Tiered Quizzes (Basic/Hard/Pro)', desc: 'Test yourself across Basic, Hard, and Pro modes with instant pedagogical explanations and speedrun timers.' },
           ].map((s, idx) => (
             <div key={idx} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5 flex flex-col justify-between">
               <div>

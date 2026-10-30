@@ -56,7 +56,7 @@ Once you understand the raw math, open the companion PyTorch script:
 
 ### Step 5: Experiment in Jupyter Notebooks & Test Your Mastery
 - Launch the companion Jupyter notebook in `notebooks/` to plot custom manifolds, visualize gradient norms, and complete student challenges.
-- Take the interactive **Mastery Quiz** built directly into the web application to test your conceptual understanding before advancing to the next stage.
+- Take the interactive **Mastery Quiz** built directly into the web application across tiered difficulty modes: **Basic Mode** (gentle visual intuitions), **Hard Mode** (mathematical mechanics & derivations), and **Pro Mode** (bleeding-edge SOTA & galaxy-brain edge cases) with instant feedback, expandable hints, and speedrun timers!
 
 ---
 
