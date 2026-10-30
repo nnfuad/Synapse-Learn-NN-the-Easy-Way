@@ -1,434 +1,510 @@
-import React, { useState } from 'react';
-import { HelpCircle, CheckCircle2, XCircle, Award, Sparkles, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
+  Award,
+  Sparkles,
+  RefreshCw,
+  Clock,
+  Lightbulb,
+  Zap,
+  Flame,
+  Trophy,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
-
-const MODULE_QUESTIONS = {
-  '00': [
-    {
-      id: 1,
-      question: "Why could Rosenblatt's 1957 Perceptron NOT use standard calculus gradient descent to train its weights?",
-      options: [
-        { text: "Hardware in 1957 was too slow to calculate derivatives.", correct: false },
-        { text: "The Heaviside step activation function has a derivative of zero almost everywhere (and undefined at 0), meaning gradients cannot flow.", correct: true },
-        { text: "Matrix multiplication had not yet been discovered.", correct: false },
-        { text: "It had too many layers for calculus to work.", correct: false },
-      ],
-      explanation: "Spot on! The step function is completely flat (slope = 0) everywhere except at x = 0 where it jumps discontinuously. Since d/dx is 0, gradient descent gets zero signal! That is why the field had to wait until 1986 for smooth, differentiable activations like Sigmoid and ReLU."
-    },
-    {
-      id: 2,
-      question: "What is the theoretical maximum classification accuracy that ANY single straight line can achieve on the 4 XOR points in 2D space?",
-      options: [
-        { text: "25% (1 out of 4)", correct: false },
-        { text: "50% (2 out of 4)", correct: false },
-        { text: "75% (3 out of 4)", correct: true },
-        { text: "100% (4 out of 4)", correct: false },
-      ],
-      explanation: "Exactly! Because the two classes form alternating diagonal pairs (like a checkerboard), any straight cut can at most isolate 3 points correctly while misclassifying the 4th point. 3/4 = 75% accuracy."
-    },
-    {
-      id: 3,
-      question: "Geometrically, what is the fundamental superpower that hidden layers with non-linear activations provide to a neural network?",
-      options: [
-        { text: "They make the learning rate 10x faster.", correct: false },
-        { text: "They warp, stretch, and fold the coordinate space so tangled data points become linearly separable in the hidden representation.", correct: true },
-        { text: "They round decimal weights to clean binary integers.", correct: false },
-        { text: "They act as a hardware firewall preventing overfitting.", correct: false },
-      ],
-      explanation: "Brilliant! Hidden layers perform a continuous non-linear topological warp on space. Points that were trapped diagonally apart in input space are pushed onto the same side or unfolded in hidden feature space!"
-    }
-  ],
-
-  '01': [
-    {
-      id: 101,
-      question: "Why did Seppo Linnainmaa's 1970 reverse-mode automatic differentiation make deep learning with millions of weights computationally possible?",
-      options: [
-        { text: "It replaces floating point math with integer arithmetic.", correct: false },
-        { text: "Reverse mode computes gradients for all N input parameters in a single backward pass, whereas forward mode requires N separate evaluations.", correct: true },
-        { text: "It removes the need for activation functions.", correct: false },
-        { text: "It computes exact Hessian second derivatives for free.", correct: false },
-      ],
-      explanation: "Exactly! When an objective maps from R^N to R (scalar loss with millions of parameters), forward-mode autodiff requires N forward passes. Linnainmaa's reverse AD sweeps backwards from the scalar loss in O(1) passes, evaluating every gradient simultaneously!"
-    },
-    {
-      id: 102,
-      question: "In a computational graph, why must variable gradients be accumulated (grad += ...) instead of assigned (grad = ...)?",
-      options: [
-        { text: "Because Python variables are immutable.", correct: false },
-        { text: "When a variable feeds into multiple downstream operations, the multivariable chain rule requires summing the partial derivatives along all branches.", correct: true },
-        { text: "To prevent division by zero in floating point registers.", correct: false },
-        { text: "It is just a stylistic convention with no mathematical impact.", correct: false },
-      ],
-      explanation: "Correct! If node x branches to both y and z, dL/dx = (dL/dy)(dy/dx) + (dL/dz)(dz/dx). Overwriting grad would discard signals from one of the computational pathways!"
-    }
-  ],
-
-  '02': [
-    {
-      id: 201,
-      question: "Why does vanilla SGD violently oscillate back and forth across ill-conditioned ravines rather than moving smoothly down the valley floor?",
-      options: [
-        { text: "The condition number is large: steep canyon walls generate massive gradients perpendicular to the valley floor, drowning out the gentle forward gradient.", correct: true },
-        { text: "SGD uses random numbers on every step.", correct: false },
-        { text: "Because the learning rate is automatically set to zero.", correct: false },
-        { text: "Ravines always contain local minima traps.", correct: false },
-      ],
-      explanation: "Bullseye! In an anisotropic ravine, the Hessian eigenvalues are heavily skewed. The gradient points almost entirely sideways into the canyon walls. Polyak Momentum fixes this by building inertia that cancels lateral oscillations!"
-    },
-    {
-      id: 202,
-      question: "Why did Loshchilov & Hutter (2017) introduce AdamW by decoupling weight decay from Adam's moment calculations?",
-      options: [
-        { text: "To make Adam run on Apple Silicon GPUs.", correct: false },
-        { text: "In standard Adam, dividing the gradient by sqrt(v) inadvertently divided the L2 weight decay penalty, giving large-gradient weights too little decay and small-gradient weights too much.", correct: true },
-        { text: "Because Adam was too fast and overshot the global minimum.", correct: false },
-        { text: "To eliminate the need for learning rate schedules.", correct: false },
-      ],
-      explanation: "Outstanding! In Adam with L2 regularization, the weight penalty lambda*theta is divided by sqrt(v), undermining true weight decay. AdamW subtracts eta*lambda*theta directly from the weight, restoring proper regularization across deep Transformers."
-    }
-  ],
-
-  '03': [
-    {
-      id: 301,
-      question: "Why did Santurkar et al. (NeurIPS 2018) debunk the original 'Internal Covariate Shift' explanation for Batch Normalization?",
-      options: [
-        { text: "BatchNorm actually increases internal covariate shift.", correct: false },
-        { text: "Even when intentionally injecting distributional shift noise, BatchNorm trains just as effectively because its true superpower is smoothing the loss landscape (making loss and gradients Lipschitz continuous).", correct: true },
-        { text: "BatchNorm is only useful for convolutional networks, not MLPs.", correct: false },
-        { text: "Calculus does not apply to normalized distributions.", correct: false },
-      ],
-      explanation: "Brilliant! Santurkar et al. proved that BatchNorm works not by stabilizing distribution shifts, but by making the loss landscape significantly smoother and predictive, allowing much larger learning rates."
-    },
-    {
-      id: 302,
-      question: "Why have modern Foundation LLMs (LLaMA 3, Mistral, Gemma, DeepSeek) universally replaced LayerNorm with RMSNorm?",
-      options: [
-        { text: "RMSNorm requires 100x more memory.", correct: false },
-        { text: "Research discovered mean-centering is computationally redundant; scaling invariance alone stabilizes gradients, saving 10-50% computational overhead.", correct: true },
-        { text: "RMSNorm eliminates the need for token embeddings.", correct: false },
-        { text: "PyTorch 1.0 could not compile LayerNorm.", correct: false },
-      ],
-      explanation: "Spot on! Zhang & Sennrich (2019) demonstrated that subtracting the mean contributes virtually nothing to training stability. RMSNorm simply scales by the root mean square, discarding mean subtraction and bias additions."
-    }
-  ],
-
-  '04': [
-    {
-      id: 401,
-      question: "Why does stacking two 3x3 convolutional layers (as popularized by VGG-16) outperform a single 5x5 convolution?",
-      options: [
-        { text: "3x3 convolutions run only on CPU, saving GPU power.", correct: false },
-        { text: "Both span an identical 5x5 receptive field, but two 3x3 convs use 18·C² parameters instead of 25·C² (28% fewer parameters) while injecting two non-linear activations.", correct: true },
-        { text: "5x5 convolutions cannot detect vertical edges.", correct: false },
-        { text: "Two 3x3 convolutions eliminate all padding requirements.", correct: false },
-      ],
-      explanation: "Exactly! Two consecutive 3x3 filters have a receptive field of 3 + (3-1) = 5. You get the exact same spatial coverage with 28% fewer weights and double the non-linear decision capacity."
-    },
-    {
-      id: 402,
-      question: "In ResNet (He et al. 2015), how does the residual identity connection H(x) = F(x) + x mathematically conquer the deep degradation problem?",
-      options: [
-        { text: "It doubles the resolution of input images.", correct: false },
-        { text: "The backward gradient contains an unhindered +1 identity term (∂L/∂x = ∂L/∂H · [I + ∂F/∂x]), allowing error signals to flow back directly across hundreds of layers with zero attenuation.", correct: true },
-        { text: "It converts all floating-point numbers to integers.", correct: false },
-        { text: "It bypasses GPU memory limits.", correct: false },
-      ],
-      explanation: "Masterful! Because of the addition +x, the gradient always carries a clean identity factor +1. Even if the residual block F(x) has small weights, the gradient never vanishes!"
-    }
-  ],
-
-  '05': [
-    {
-      id: 501,
-      question: "Why does the LSTM Constant Error Carousel (CEC) prevent the vanishing gradient catastrophe that crippled vanilla RNNs?",
-      options: [
-        { text: "It uses larger learning rates.", correct: false },
-        { text: "The cell state updates additively (c_t = f_t · c_{t-1} + i_t · c̃_t), meaning the gradient flow ∂c_t / ∂c_{t-1} = f_t (approx 1.0 when forget gate is open), bypassing exponential matrix decay.", correct: true },
-        { text: "It skips all matrix multiplications.", correct: false },
-        { text: "LSTMs only process the first 5 words of any sentence.", correct: false },
-      ],
-      explanation: "Bullseye! In vanilla RNNs, backpropagating through time repeatedly multiplies by W_hh, causing exponential decay (e.g. 0.85^50 ≈ 0.0003). In an LSTM, the cell state is a linear highway where error signals travel undiminished."
-    },
-    {
-      id: 502,
-      question: "What critical architectural bottleneck did Bahdanau Additive Attention (2014) resolve in Seq2Seq models?",
-      options: [
-        { text: "It eliminated the need for training data.", correct: false },
-        { text: "Traditional Seq2Seq compressed an entire 50-word sentence into a single fixed-length vector h_T; Bahdanau attention allows the decoder to dynamically query and spotlight all source words.", correct: true },
-        { text: "It allowed recurrent networks to run without activations.", correct: false },
-        { text: "It translated text into binary ASCII directly.", correct: false },
-      ],
-      explanation: "Outstanding! Compressing a complex sentence into a single vector created a memory bottleneck. Bahdanau attention acts as an associative searchlight, letting the decoder focus on relevant source words at every decoding step."
-    }
-  ],
-
-  '06': [
-    {
-      id: 601,
-      question: "Why must the dot product Q · K^T be scaled by 1 / sqrt(d_k) in Scaled Dot-Product Attention (Vaswani et al. 2017)?",
-      options: [
-        { text: "To make the matrix square.", correct: false },
-        { text: "For large dimensions d_k, the dot product variance scales to d_k, pushing the Softmax function into flat saturation zones with near-zero gradients.", correct: true },
-        { text: "Because square roots run faster on tensor cores.", correct: false },
-        { text: "To prevent memory leaks in PyTorch.", correct: false },
-      ],
-      explanation: "Precisely! If Q and K have mean 0 and variance 1, their dot product has variance d_k. When d_k = 128, values can reach ±30, causing Softmax to output 1.0 and 0.0 with virtually zero gradient flow. Dividing by sqrt(d_k) restores unit variance."
-    },
-    {
-      id: 602,
-      question: "How does Rotary Position Embedding (RoPE) mathematically encode relative token distance without absolute position lookup tables?",
-      options: [
-        { text: "By adding sinusoidal waves directly to the word embeddings.", correct: false },
-        { text: "By rotating query and key vector pairs in 2D coordinate planes by angle m·θ; the dot product <R_m q, R_n k> naturally collapses into a function depending strictly on relative distance (n - m).", correct: true },
-        { text: "By measuring the character count of each word.", correct: false },
-        { text: "By sorting all tokens alphabetically.", correct: false },
-      ],
-      explanation: "Brilliant! RoPE uses complex rotation matrices: R_m^T R_n = R_{n-m}. This guarantees that the attention dot product depends only on how far apart two tokens are, not where they sit in absolute sequence space!"
-    }
-  ],
-
-  '07': [
-    {
-      id: 1,
-      question: "Why did modern generative AI (Flux.1, Stable Diffusion 3, AlphaFold 3) transition from DDPM Diffusion to Optimal Transport Flow Matching?",
-      options: [
-        { text: "Flow Matching models require no GPUs and can train on standard CPUs.", correct: false },
-        { text: "Flow Matching generates straight, deterministic probability trajectories via Optimal Transport, enabling 10x faster ODE generation in 10-20 steps instead of noisy Brownian SDE curves.", correct: true },
-        { text: "Diffusion models cannot generate 2D or 3D images.", correct: false },
-        { text: "Flow Matching completely eliminates all neural network weights.", correct: false },
-      ],
-      explanation: "Spot on! Diffusion models generate curved, stochastic paths driven by Brownian motion, which requires 50-1000 Langevin steps. Flow Matching straightens trajectories so standard Runge-Kutta ODE solvers can generate samples in just 10-20 steps!"
-    },
-    {
-      id: 2,
-      question: "In DDPM forward noise corruption q(x_t | x_0), what allows sampling at arbitrary timestep t in a single closed-form step without running steps 1...t sequentially?",
-      options: [
-        { text: "Linear algebra matrix inversion.", correct: false },
-        { text: "The sum of independent Gaussian random variables is analytically another Gaussian, parameterized directly by cumulative signal retention ᾱ_t = ∏(1 - β_s).", correct: true },
-        { text: "Backpropagation through time.", correct: false },
-        { text: "Rejection sampling with Monte Carlo rollouts.", correct: false },
-      ],
-      explanation: "Exactly! Because the convolution of Gaussians is Gaussian, the cumulative variance across t steps collapses analytically to x_t = sqrt(ᾱ_t) x_0 + sqrt(1 - ᾱ_t) ε."
-    }
-  ],
-
-  '08': [
-    {
-      id: 1,
-      question: "In Sparse Mixture of Experts (MoE), what devastating pathology occurs if the auxiliary load balancing loss α · N · ∑(f_i · P_i) is omitted?",
-      options: [
-        { text: "The model runs out of memory immediately.", correct: false },
-        { text: "Router Collapse: a self-reinforcing feedback loop routes nearly all tokens to 1 or 2 favorite experts while other experts starve and receive zero gradients.", correct: true },
-        { text: "All weights instantly become NaN.", correct: false },
-        { text: "The model switches automatically from PyTorch to TensorFlow.", correct: false },
-      ],
-      explanation: "Bullseye! Without load balancing, the router quickly picks early 'favorite' experts that gain better gradients, attracting even more tokens in a vicious cycle until 80%+ of experts are completely idle."
-    },
-    {
-      id: 2,
-      question: "What is the primary breakthrough of DeepSeek-R1's Group Relative Policy Optimization (GRPO) over standard PPO RLHF?",
-      options: [
-        { text: "It uses larger learning rates.", correct: false },
-        { text: "It completely eliminates the memory-heavy Critic/Value neural network by sampling groups of candidate completions and calculating relative advantages within the group.", correct: true },
-        { text: "It trains without any prompts or data.", correct: false },
-        { text: "It only works on chess engines.", correct: false },
-      ],
-      explanation: "Precisely! PPO requires maintaining a Critic network the same size as the Policy LLM (doubling GPU VRAM). GRPO samples G rollouts and normalizes advantages directly as A_i = (r_i - mean(r)) / (std(r) + eps), saving enormous compute!"
-    }
-  ],
-
-  '09': [
-    {
-      id: 1,
-      question: "In Anthropic's Transformer Circuits framework, how does the 2-layer Induction Head circuit perform in-context pattern copying [A][B] ... [A] -> [B]?",
-      options: [
-        { text: "Through a hardcoded Python regex in the tokenizer.", correct: false },
-        { text: "Layer 0 previous-token head transfers token A's identity into token B's residual stream; Layer 1 induction head queries for 'preceded by A', attends to B, and the OV circuit boosts B's logit.", correct: true },
-        { text: "By storing all previous tokens in an external SQL database.", correct: false },
-        { text: "By using recurrent feedback loops between layers.", correct: false },
-      ],
-      explanation: "Brilliant! This microscopic 2-layer circuit is the fundamental engine of in-context learning in modern Transformers, emerging during the sudden macroscopic 'induction bump' phase change."
-    },
-    {
-      id: 2,
-      question: "Why do Sparse Autoencoders (SAEs) enforce a strict unit norm constraint ||W_dec, i||_2 = 1.0 on decoder dictionary columns?",
-      options: [
-        { text: "To prevent GPU floating point overflow.", correct: false },
-        { text: "To prevent the network from trivially shrinking activation features f_i to cheat the L1 sparsity loss while blowing up decoder weights to compensate.", correct: true },
-        { text: "To make the matrix symmetric.", correct: false },
-        { text: "It is required by the Adam optimizer.", correct: false },
-      ],
-      explanation: "Exact! If decoder weights were unconstrained, the model could scale W_dec by 1000x and scale feature activations by 1/1000x, achieving near-zero L1 loss without actual sparsity. Unit norm columns enforce genuine sparse dictionary learning!"
-    }
-  ]
-};
+import { MODULE_QUIZ_DATA, QUIZ_DIFFICULTIES } from '../data/quizData.js';
 
 export default function StudentQuiz({ currentModule = '00' }) {
-  const questions = MODULE_QUESTIONS[currentModule] || MODULE_QUESTIONS['00'];
+  // Retrieve all questions for current module or fallback to '00'
+  const allModuleQuestions = MODULE_QUIZ_DATA[currentModule] || MODULE_QUIZ_DATA['00'] || [];
+
+  // Quiz state
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [expandedHints, setExpandedHints] = useState({});
+  const [modeType, setModeType] = useState('exam'); // 'exam' or 'instant'
+  
+  // Speedrun timer state
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef(null);
 
-  // Reset when module changes
-  React.useEffect(() => {
+  // Filter questions based on chosen difficulty
+  const questions = React.useMemo(() => {
+    if (selectedDifficulty === 'all') {
+      return allModuleQuestions;
+    }
+    return allModuleQuestions.filter(q => q.difficulty === selectedDifficulty);
+  }, [allModuleQuestions, selectedDifficulty]);
+
+  // Difficulty counts for badge pills
+  const countsByDifficulty = React.useMemo(() => {
+    const counts = { all: allModuleQuestions.length, basic: 0, hard: 0, pro: 0 };
+    allModuleQuestions.forEach(q => {
+      if (counts[q.difficulty] !== undefined) {
+        counts[q.difficulty]++;
+      }
+    });
+    return counts;
+  }, [allModuleQuestions]);
+
+  // Reset quiz state whenever module or difficulty changes
+  const resetQuiz = () => {
     setSelectedAnswers({});
     setSubmitted(false);
-  }, [currentModule]);
-
-  const handleSelect = (qId, optionIdx) => {
-    if (submitted) return;
-    setSelectedAnswers({ ...selectedAnswers, [qId]: optionIdx });
+    setExpandedHints({});
+    setElapsedSeconds(0);
   };
 
-  const calculateScore = () => {
+  useEffect(() => {
+    resetQuiz();
+  }, [currentModule, selectedDifficulty]);
+
+  // Stopwatch timer logic
+  useEffect(() => {
+    if (timerEnabled && !submitted) {
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timerEnabled, submitted]);
+
+  const handleSelectOption = (qId, optionIdx) => {
+    // In submitted exam mode, locks answers
+    if (submitted && modeType === 'exam') return;
+    
+    // In instant mode, lock after first selection for that question
+    if (modeType === 'instant' && selectedAnswers[qId] !== undefined) return;
+
+    const nextAnswers = { ...selectedAnswers, [qId]: optionIdx };
+    setSelectedAnswers(nextAnswers);
+
+    // If instant mode, check if all are answered
+    if (modeType === 'instant') {
+      const allDone = questions.every(q => nextAnswers[q.id] !== undefined);
+      if (allDone) {
+        setSubmitted(true);
+        triggerCompletionCelebration(calculateScore(nextAnswers));
+      }
+    }
+  };
+
+  const toggleHint = (qId) => {
+    setExpandedHints(prev => ({
+      ...prev,
+      [qId]: !prev[qId]
+    }));
+  };
+
+  const calculateScore = (answers = selectedAnswers) => {
     let correct = 0;
     questions.forEach(q => {
-      if (selectedAnswers[q.id] !== undefined && q.options[selectedAnswers[q.id]].correct) {
+      if (answers[q.id] !== undefined && q.options[answers[q.id]]?.correct) {
         correct++;
       }
     });
     return correct;
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    const score = calculateScore();
-    if (score === questions.length) {
+  const triggerCompletionCelebration = (scoreVal) => {
+    if (scoreVal === questions.length && questions.length > 0) {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 100,
+        spread: 80,
         origin: { y: 0.6 }
       });
     }
   };
 
-  const handleReset = () => {
-    setSelectedAnswers({});
-    setSubmitted(false);
+  const handleSubmit = () => {
+    setSubmitted(true);
+    const scoreVal = calculateScore();
+    triggerCompletionCelebration(scoreVal);
   };
 
   const score = calculateScore();
-  const allAnswered = questions.every(q => selectedAnswers[q.id] !== undefined);
+  const allAnswered = questions.length > 0 && questions.every(q => selectedAnswers[q.id] !== undefined);
+  const answeredCount = questions.filter(q => selectedAnswers[q.id] !== undefined).length;
+
+  const formatTime = (totalSec) => {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Playful achievement title generator
+  const getPlayfulRank = () => {
+    const pct = questions.length > 0 ? (score / questions.length) : 0;
+    if (pct === 1) {
+      if (selectedDifficulty === 'pro') return { title: '👑 Galaxy Brain SOTA Supreme', desc: 'You speak fluent gradient tensors! NeurIPS review committee has nothing on you.' };
+      if (selectedDifficulty === 'hard') return { title: '🔥 Gradient Bender Elite', desc: 'No anisotropic ravine or vanished gradient can stop your backpropagation!' };
+      if (selectedDifficulty === 'basic') return { title: '🌱 Neuron Whisperer', desc: 'Flawless foundation! You are ready to crush the Hard and Pro gauntlets.' };
+      return { title: '⚡ Master of the Neural Multiverse', desc: 'Clean sweep across all difficulties! Pure 100% computational graph mastery.' };
+    }
+    if (pct >= 0.75) {
+      return { title: '🚀 Tensor Titan', desc: 'Rock solid intuition! Just a tiny hyperparameter tuning away from perfection.' };
+    }
+    if (pct >= 0.5) {
+      return { title: '🛠️ Local Minima Survivor', desc: 'Good fight! A little more momentum and you will escape that saddle point.' };
+    }
+    return { title: '☕ Gradient Divergence (Grab Coffee)', desc: 'Learning rate was a bit spicy! Review the pedagogical insights and spin again.' };
+  };
+
+  const rank = getPlayfulRank();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-2">
+      {/* Header Banner */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-3 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
+
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
           <HelpCircle className="w-3.5 h-3.5" />
           <span>Interactive Knowledge Check</span>
         </div>
-        <h2 className="text-2xl font-black text-white">Module {currentModule} Mastery Assessment</h2>
-        <p className="text-xs text-slate-400 max-w-xl mx-auto">
-          Test your conceptual understanding of the mathematics, historical breakthroughs, and physical intuitions covered in this module.
+        
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Module {currentModule} Mastery Assessment
+        </h2>
+        
+        <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Select your challenge tier below. Whether you want gentle visual intuitions or bleeding-edge SOTA research internals, pick your mode and test your neural wits.
         </p>
+
+        {/* Difficulty Selection Pills */}
+        <div className="pt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto">
+            {QUIZ_DIFFICULTIES.map(diff => {
+              const isActive = selectedDifficulty === diff.id;
+              const count = countsByDifficulty[diff.id] || 0;
+
+              let activeBorder = 'border-slate-800 bg-slate-950/70 text-slate-400 hover:border-slate-700 hover:text-slate-200';
+              if (isActive) {
+                if (diff.id === 'basic') activeBorder = 'border-emerald-500 bg-emerald-950/40 text-emerald-300 ring-2 ring-emerald-500/40';
+                else if (diff.id === 'hard') activeBorder = 'border-amber-500 bg-amber-950/40 text-amber-300 ring-2 ring-amber-500/40';
+                else if (diff.id === 'pro') activeBorder = 'border-fuchsia-500 bg-fuchsia-950/40 text-fuchsia-300 ring-2 ring-fuchsia-500/40';
+                else activeBorder = 'border-cyan-500 bg-cyan-950/40 text-cyan-300 ring-2 ring-cyan-500/40';
+              }
+
+              return (
+                <button
+                  key={diff.id}
+                  onClick={() => setSelectedDifficulty(diff.id)}
+                  className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between group ${activeBorder}`}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="text-base">{diff.icon}</span>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-slate-800/80 border border-slate-700/60 text-slate-300">
+                      {count} Qs
+                    </span>
+                  </div>
+                  <div className="font-bold text-xs sm:text-sm text-white group-hover:text-cyan-300 transition">
+                    {diff.label}
+                  </div>
+                  <div className="text-[10px] text-slate-500 leading-tight line-clamp-1 mt-0.5">
+                    {diff.id === 'basic' ? 'Gentle & Intuitive' : diff.id === 'hard' ? 'Math & Mechanics' : diff.id === 'pro' ? 'Galaxy Brain SOTA' : 'Full Challenge'}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Control Bar: Mode Toggle & Timer */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-slate-300 font-medium">
+          <span className="text-slate-500">Active Tier:</span>
+          <span className="capitalize font-bold text-white flex items-center gap-1.5">
+            {selectedDifficulty === 'basic' && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
+            {selectedDifficulty === 'hard' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
+            {selectedDifficulty === 'pro' && <span className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse" />}
+            {selectedDifficulty === 'all' && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />}
+            {selectedDifficulty} Mode ({questions.length} questions)
+          </span>
+          <span className="text-slate-600">|</span>
+          <span className="text-slate-400 font-mono">
+            {answeredCount}/{questions.length} Answered
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* Practice vs Exam mode toggle */}
+          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <button
+              onClick={() => { setModeType('exam'); resetQuiz(); }}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition ${
+                modeType === 'exam'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              📝 Exam
+            </button>
+            <button
+              onClick={() => { setModeType('instant'); resetQuiz(); }}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition ${
+                modeType === 'instant'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              ⚡ Instant
+            </button>
+          </div>
+
+          {/* Speedrun timer toggle */}
+          <button
+            onClick={() => setTimerEnabled(!timerEnabled)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition ${
+              timerEnabled
+                ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 font-mono'
+                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>{timerEnabled ? formatTime(elapsedSeconds) : 'Timer'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Questions List */}
       <div className="space-y-4">
-        {questions.map((q, idx) => {
-          const selectedIdx = selectedAnswers[q.id];
-          return (
-            <div
-              key={q.id}
-              className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 transition"
-            >
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-300 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {idx + 1}
-                </span>
-                <div className="font-bold text-white text-sm sm:text-base leading-snug">
-                  {q.question}
-                </div>
-              </div>
+        {questions.length === 0 ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
+            No questions found for this mode in this module yet.
+          </div>
+        ) : (
+          questions.map((q, idx) => {
+            const selectedIdx = selectedAnswers[q.id];
+            const isAnswered = selectedIdx !== undefined;
+            const isInstant = modeType === 'instant';
+            const showFeedback = submitted || (isInstant && isAnswered);
+            const isHintOpen = Boolean(expandedHints[q.id]);
 
-              {/* Options */}
-              <div className="space-y-2 pl-9">
-                {q.options.map((opt, oIdx) => {
-                  const isSelected = selectedIdx === oIdx;
-                  let optStyle = "bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-850";
+            // Question difficulty badge
+            let diffBadge = 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+            if (q.difficulty === 'basic') diffBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+            if (q.difficulty === 'hard') diffBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+            if (q.difficulty === 'pro') diffBadge = 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30';
 
-                  if (submitted) {
-                    if (opt.correct) {
-                      optStyle = "bg-emerald-950/40 border-emerald-500/60 text-emerald-200";
-                    } else if (isSelected && !opt.correct) {
-                      optStyle = "bg-rose-950/40 border-rose-500/60 text-rose-200";
-                    } else {
-                      optStyle = "bg-slate-950/30 border-slate-900 text-slate-600";
-                    }
-                  } else if (isSelected) {
-                    optStyle = "bg-cyan-950/40 border-cyan-500/80 text-cyan-200 ring-1 ring-cyan-500/50";
-                  }
-
-                  return (
-                    <div
-                      key={oIdx}
-                      onClick={() => handleSelect(q.id, oIdx)}
-                      className={`p-3.5 rounded-xl border text-xs sm:text-sm font-medium transition cursor-pointer flex items-center justify-between ${optStyle}`}
-                    >
-                      <span>{opt.text}</span>
-                      {submitted && opt.correct && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 ml-2" />
-                      )}
-                      {submitted && isSelected && !opt.correct && (
-                        <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 ml-2" />
-                      )}
+            return (
+              <div
+                key={q.id}
+                className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 transition"
+              >
+                {/* Question Header & Difficulty Tag */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-300 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <div className="font-bold text-white text-sm sm:text-base leading-snug">
+                      {q.question}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {/* Feedback Explanation */}
-              {submitted && (
-                <div className="mt-4 ml-9 p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed animate-fadeIn">
-                  <span className="font-bold text-cyan-400 block mb-1">Pedagogical Insight:</span>
-                  {q.explanation}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold border ${diffBadge}`}>
+                      {q.difficulty}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+
+                {/* Optional Hint Toggle */}
+                {q.hint && (
+                  <div className="pl-9">
+                    <button
+                      onClick={() => toggleHint(q.id)}
+                      className="inline-flex items-center gap-1.5 text-xs text-amber-400/90 hover:text-amber-300 font-medium transition cursor-pointer"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span>{isHintOpen ? 'Hide Hint' : 'Need a hint?'}</span>
+                      {isHintOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
+                    {isHintOpen && (
+                      <div className="mt-2 p-3 rounded-xl bg-amber-950/20 border border-amber-500/20 text-xs text-amber-200/90 animate-fadeIn">
+                        <strong className="text-amber-400 font-semibold mr-1">Hint:</strong>
+                        {q.hint}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Options List */}
+                <div className="space-y-2 pl-9">
+                  {q.options.map((opt, oIdx) => {
+                    const isSelected = selectedIdx === oIdx;
+                    let optStyle = "bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-850";
+
+                    if (showFeedback) {
+                      if (opt.correct) {
+                        optStyle = "bg-emerald-950/40 border-emerald-500/60 text-emerald-200 font-medium";
+                      } else if (isSelected && !opt.correct) {
+                        optStyle = "bg-rose-950/40 border-rose-500/60 text-rose-200";
+                      } else {
+                        optStyle = "bg-slate-950/30 border-slate-900 text-slate-600";
+                      }
+                    } else if (isSelected) {
+                      optStyle = "bg-cyan-950/40 border-cyan-500/80 text-cyan-200 ring-1 ring-cyan-500/50";
+                    }
+
+                    return (
+                      <div
+                        key={oIdx}
+                        onClick={() => handleSelectOption(q.id, oIdx)}
+                        className={`p-3.5 rounded-xl border text-xs sm:text-sm font-medium transition cursor-pointer flex items-center justify-between ${optStyle}`}
+                      >
+                        <span className="leading-relaxed">{opt.text}</span>
+                        {showFeedback && opt.correct && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 ml-2" />
+                        )}
+                        {showFeedback && isSelected && !opt.correct && (
+                          <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 ml-2" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Feedback Explanation */}
+                {showFeedback && (
+                  <div className="mt-4 ml-9 p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed animate-fadeIn">
+                    <span className="font-bold text-cyan-400 block mb-1 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Pedagogical Insight:</span>
+                    </span>
+                    {q.explanation}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
 
-      {/* Action Footer */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+      {/* Action Footer & Results */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
         {!submitted ? (
-          <button
-            onClick={handleSubmit}
-            disabled={!allAnswered}
-            className={`px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 ${
-              allAnswered
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:scale-102"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed"
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Submit Answers & Calculate Score</span>
-          </button>
-        ) : (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-                <Award className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <div className="text-sm font-bold text-white">
-                  Score: {score} / {questions.length} ({Math.round((score / questions.length) * 100)}%)
-                </div>
-                <div className="text-xs text-slate-400">
-                  {score === questions.length ? "Flawless score! Full conceptual mastery demonstrated." : "Good attempt! Review the explanations above."}
-                </div>
-              </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-xs text-slate-400">
+              {allAnswered ? (
+                <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> All {questions.length} questions answered! Ready to grade.
+                </span>
+              ) : (
+                <span>
+                  Answer all {questions.length} questions to submit ({answeredCount}/{questions.length} complete).
+                </span>
+              )}
             </div>
 
             <button
-              onClick={handleReset}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition flex items-center gap-1.5"
+              onClick={handleSubmit}
+              disabled={!allAnswered}
+              className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 ${
+                allAnswered
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:scale-102 cursor-pointer"
+                  : "bg-slate-800 text-slate-500 cursor-not-allowed"
+              }`}
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retry Quiz</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Submit Answers & Grade Quiz</span>
             </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-white">
+                      Score: {score} / {questions.length}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs font-bold">
+                      {Math.round((score / questions.length) * 100)}%
+                    </span>
+                    {timerEnabled && (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-xs flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatTime(elapsedSeconds)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs font-semibold text-cyan-300 mt-0.5">
+                    {rank.title}
+                  </div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    {rank.desc}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={resetQuiz}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Retry Quiz</span>
+                </button>
+
+                {selectedDifficulty === 'basic' && (
+                  <button
+                    onClick={() => setSelectedDifficulty('hard')}
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold text-amber-300 transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>Try Hard Mode</span>
+                    <Flame className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                {selectedDifficulty === 'hard' && (
+                  <button
+                    onClick={() => setSelectedDifficulty('pro')}
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-fuchsia-500/20 hover:bg-fuchsia-500/30 border border-fuchsia-500/40 text-xs font-bold text-fuchsia-300 transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>Try Pro Mode</span>
+                    <Zap className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Difficulty Switcher Footer */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-slate-400">
+              <span>Switch difficulty tier:</span>
+              <div className="flex items-center gap-1.5">
+                {['all', 'basic', 'hard', 'pro'].map(tier => (
+                  <button
+                    key={tier}
+                    onClick={() => setSelectedDifficulty(tier)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono capitalize transition ${
+                      selectedDifficulty === tier
+                        ? 'bg-cyan-500 text-black font-bold'
+                        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    }`}
+                  >
+                    {tier}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
