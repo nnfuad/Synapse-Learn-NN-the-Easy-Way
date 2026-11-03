@@ -87,7 +87,7 @@ export default function DashboardPage({ onNavigate }) {
       {/* Curriculum Stages Grid */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Curriculum Stages (10 Chapters)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Curriculum Stages (11 Chapters)</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Click any stage to launch its dedicated interactive learning environment:
           </p>

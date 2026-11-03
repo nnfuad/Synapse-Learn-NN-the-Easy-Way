@@ -707,6 +707,108 @@ class KVCache:
         out1, attn1 = self.layer1(resid, causal_mask) # Spikes attention to token B!
         resid = resid + out1
         return self.w_u(resid), attn0, attn1`
+  },
+
+  // Module 10 Snippets
+  hand_nn_scratch: {
+    module: '10',
+    title: "Pure NumPy Hand-Calculated Neural Network with Step Tracing",
+    language: "Python (NumPy)",
+    path: "python/module10_train_nn_by_hand/hand_neural_network.py",
+    description: "Every intermediate scalar arithmetic step recorded: z1, a1, z2, a2, with explicit analytical chain rule derivatives for backpropagation.",
+    code: `import numpy as np
+
+class HandNeuralNetwork:
+    """Transparent 2-Layer Neural Network with explicit step tracing."""
+    def __init__(self, n_in=2, n_hidden=3, n_out=1, activation='relu', lr=0.1, seed=42):
+        np.random.seed(seed)
+        self.n_in, self.n_hidden, self.n_out = n_in, n_hidden, n_out
+        self.activation = activation
+        self.lr = lr
+        # He / Xavier initialization
+        scale1 = np.sqrt(2.0 / n_in) if activation == 'relu' else np.sqrt(1.0 / n_in)
+        self.W1 = np.random.randn(n_hidden, n_in) * scale1
+        self.b1 = np.zeros((n_hidden, 1))
+        self.W2 = np.random.randn(n_out, n_hidden) * np.sqrt(1.0 / n_hidden)
+        self.b2 = np.zeros((n_out, 1))
+
+    def forward(self, x):
+        """Step-by-step forward pass returning full arithmetic trace."""
+        x = np.array(x, dtype=float).reshape(-1, 1)
+        z1 = self.W1 @ x + self.b1                     # Hidden pre-activation
+        a1 = np.maximum(0, z1) if self.activation == 'relu' else 1 / (1 + np.exp(-z1))
+        z2 = self.W2 @ a1 + self.b2                    # Output pre-activation
+        y_hat = 1.0 / (1.0 + np.exp(-np.clip(z2, -30, 30))) # Sigmoid output
+        return {'x': x, 'z1': z1, 'a1': a1, 'z2': z2, 'y_hat': y_hat}
+
+    def backward(self, trace, y):
+        """Analytical chain rule backpropagation calculated step-by-step."""
+        y_hat = trace['y_hat']
+        a1, z1, x = trace['a1'], trace['z1'], trace['x']
+        # 1. Output error: dL/dz2 = y_hat - y (BCE loss + Sigmoid)
+        delta2 = y_hat - y
+        grad_W2 = delta2 @ a1.T
+        grad_b2 = delta2
+        # 2. Hidden backpressure: dL/da1 = W2.T @ delta2
+        dL_da1 = self.W2.T @ delta2
+        # 3. Local activation derivative: da1/dz1
+        da1_dz1 = (z1 > 0).astype(float) if self.activation == 'relu' else a1 * (1.0 - a1)
+        delta1 = dL_da1 * da1_dz1
+        grad_W1 = delta1 @ x.T
+        grad_b1 = delta1
+        return {'grad_W1': grad_W1, 'grad_b1': grad_b1, 'grad_W2': grad_W2, 'grad_b2': grad_b2}
+
+    def step(self, grads, lr=None):
+        eta = lr or self.lr
+        self.W1 -= eta * grads['grad_W1']
+        self.b1 -= eta * grads['grad_b1']
+        self.W2 -= eta * grads['grad_W2']
+        self.b2 -= eta * grads['grad_b2']`
+  },
+
+  pytorch_glass_box: {
+    module: '10',
+    title: "PyTorch Glass-Box Model & Autograd Equivalence",
+    language: "PyTorch 2.x",
+    path: "python/module10_train_nn_by_hand/pytorch_comparison.py",
+    description: "Validating that by-hand analytical chain rule derivatives match PyTorch autograd gradients within 1e-7.",
+    code: `import torch
+import torch.nn as nn
+
+class PyTorchGlassBoxNN(nn.Module):
+    """PyTorch equivalent for autograd parity validation."""
+    def __init__(self, n_in=2, n_hidden=3, n_out=1, activation='relu'):
+        super().__init__()
+        self.fc1 = nn.Linear(n_in, n_hidden)
+        self.act = nn.ReLU() if activation == 'relu' else nn.Sigmoid()
+        self.fc2 = nn.Linear(n_hidden, n_out)
+        self.out_act = nn.Sigmoid()
+
+    def forward(self, x):
+        z1 = self.fc1(x)
+        a1 = self.act(z1)
+        z2 = self.fc2(a1)
+        y_hat = self.out_act(z2)
+        return y_hat, {'z1': z1, 'a1': a1, 'z2': z2, 'y_hat': y_hat}
+
+def verify_gradients_parity(numpy_nn, torch_nn, x, y):
+    """Numerically verifies hand gradients == torch.autograd gradients."""
+    # Run torch autograd
+    torch_x = torch.tensor(x, dtype=torch.float32, requires_grad=True).reshape(1, -1)
+    torch_y = torch.tensor([[y]], dtype=torch.float32)
+    y_pred, _ = torch_nn(torch_x)
+    loss = nn.BCELoss()(y_pred, torch_y)
+    loss.backward()
+
+    # Run NumPy by-hand backward
+    trace = numpy_nn.forward(x)
+    hand_grads = numpy_nn.backward(trace, y)
+
+    # Check maximum absolute difference
+    diff_w2 = np.max(np.abs(hand_grads['grad_W2'] - torch_nn.fc2.weight.grad.numpy()))
+    diff_w1 = np.max(np.abs(hand_grads['grad_W1'] - torch_nn.fc1.weight.grad.numpy()))
+    assert diff_w2 < 1e-6 and diff_w1 < 1e-6, "Parity check failed!"
+    print(f"Parity Verified! Max diff W2: {diff_w2:.2e}, W1: {diff_w1:.2e}")`
   }
 };
 

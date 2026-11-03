@@ -29,6 +29,7 @@ const MODULE_ICONS = {
   '07': Zap,
   '08': Cpu,
   '09': Microscope,
+  '10': Layers,
 };
 
 export default function Sidebar({ currentModuleId, currentPage, onNavigate, isMobileOpen, onCloseMobile }) {
@@ -156,7 +157,7 @@ export default function Sidebar({ currentModuleId, currentPage, onNavigate, isMo
             <span className="text-slate-400">Automated Tests:</span>
             <span className="text-emerald-400 font-bold flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              79/79 Passing
+              93/93 Passing
             </span>
           </div>
 

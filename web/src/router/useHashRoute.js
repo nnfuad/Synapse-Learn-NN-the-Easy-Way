@@ -8,7 +8,7 @@ export function normalizeModuleId(rawId) {
   if (rawId === undefined || rawId === null) return '00';
   const clean = String(rawId).trim().replace(/^module\/?/i, '').replace(/^#\/?/i, '');
   const num = parseInt(clean, 10);
-  if (!isNaN(num) && num >= 0 && num <= 9) {
+  if (!isNaN(num) && num >= 0 && num <= 10) {
     return String(num).padStart(2, '0');
   }
   return '00';

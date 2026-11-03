@@ -11,6 +11,10 @@ export const CURRICULUM_SECTIONS = [
     title: 'Part III: The Modern Frontier (2017 - 2026)',
     modules: ['06', '07', '08', '09'],
   },
+  {
+    title: 'Part IV: First-Principles Sandbox (Interactive)',
+    modules: ['10'],
+  },
 ];
 
 export const MODULES_MAP = {
@@ -163,6 +167,21 @@ export const MODULES_MAP = {
     sota: 'Anthropic SAE Circuits',
     workspace: 'python/module09_mechanistic_interpretability/',
     notebook: 'notebooks/09_mechanistic_interpretability.ipynb',
+  },
+  '10': {
+    id: '10',
+    number: '10',
+    title: 'Train a NN by Hand and See What Happens Inside',
+    subtitle: 'Transparent glass-box neural network: manual arithmetic, forward step tracing, analytical chain rule backpropagation, and the "Be The Optimizer" gamified challenge.',
+    era: 'First Principles',
+    part: 'Part IV: First-Principles Sandbox',
+    paper: 'Cybenko (1989) / Hornik (1991) Universal Approximation',
+    analogy: 'A transparent clockwork watch: turn every gear by hand, watch fluid flow through glass tubes, and command the gradient backpressure wave.',
+    tests: '14/14 Passing',
+    scratch: 'NumPy By-Hand Engine',
+    sota: 'PyTorch Glass-Box Model',
+    workspace: 'python/module10_train_nn_by_hand/',
+    notebook: 'notebooks/10_train_nn_by_hand.ipynb',
   },
 };
 

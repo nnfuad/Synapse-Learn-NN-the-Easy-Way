@@ -36,12 +36,13 @@ import Module06Visualizer from '../components/modules/Module06Visualizer.jsx';
 import Module07Visualizer from '../components/modules/Module07Visualizer.jsx';
 import Module08Visualizer from '../components/modules/Module08Visualizer.jsx';
 import Module09Visualizer from '../components/modules/Module09Visualizer.jsx';
+import Module10Visualizer from '../components/modules/Module10Visualizer.jsx';
 
 export default function ModulePage({ moduleId, onNavigate }) {
   // Normalize module ID to 2-digit canonical format (e.g. '0' -> '00', '1' -> '01')
   const cleanId = String(moduleId || '00').replace(/^module\/?/i, '');
   const parsedNum = parseInt(cleanId, 10);
-  const normId = !isNaN(parsedNum) && parsedNum >= 0 && parsedNum <= 9
+  const normId = !isNaN(parsedNum) && parsedNum >= 0 && parsedNum <= 10
     ? String(parsedNum).padStart(2, '0')
     : '00';
 
@@ -88,7 +89,7 @@ export default function ModulePage({ moduleId, onNavigate }) {
           <div className="space-y-2 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-semibold text-cyan-400">
               <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                STAGE {mod.number} OF 10
+                STAGE {mod.number} OF {MODULES_LIST.length}
               </span>
               <span>•</span>
               <span className="text-slate-400">ERA: {mod.era}</span>
@@ -244,6 +245,15 @@ export default function ModulePage({ moduleId, onNavigate }) {
             {activeTab === 'visualizer' && <Module09Visualizer />}
             {activeTab === 'code' && <CodeViewer currentModule="09" />}
             {activeTab === 'quiz' && <StudentQuiz currentModule="09" />}
+          </>
+        )}
+
+        {/* Module 10 Views */}
+        {normId === '10' && (
+          <>
+            {activeTab === 'visualizer' && <Module10Visualizer />}
+            {activeTab === 'code' && <CodeViewer currentModule="10" />}
+            {activeTab === 'quiz' && <StudentQuiz currentModule="10" />}
           </>
         )}
         </ErrorBoundary>

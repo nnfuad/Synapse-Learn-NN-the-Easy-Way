@@ -1131,5 +1131,202 @@ export const MODULE_QUIZ_DATA = {
       explanation: "Brilliant! Elhage et al. showed that an attention head decomposes into two independent bilinear operators: QK determines the routing graph (which source token gets attended to), while OV determines the linear feature transformation applied to the attended token's representation!",
       hint: "One decides who talks to whom; the other decides what message is transmitted."
     }
+  ],
+  '10': [
+    {
+      id: '10-b1',
+      difficulty: 'basic',
+      question: "What is the minimum architectural requirement for a feedforward neural network to solve the non-linear XOR classification problem?",
+      options: [
+        { text: "At least one hidden layer with non-linear activation functions (e.g., ReLU or Sigmoid).", correct: true },
+        { text: "A single Perceptron with a higher learning rate.", correct: false },
+        { text: "An infinite number of linear layers without activations.", correct: false },
+        { text: "A recurrent memory tape with backpropagation through time.", correct: false }
+      ],
+      explanation: "Spot on! Minsky and Papert proved in 1969 that a single linear line can never separate XOR. Adding even a single hidden layer with 2 non-linear neurons bends space so the 4 points become linearly separable!",
+      hint: "Think back to the 1969 AI Winter crisis."
+    },
+    {
+      id: '10-b2',
+      difficulty: 'basic',
+      question: "What exact mathematical operations occur inside a single artificial neuron during the forward pass?",
+      options: [
+        { text: "An affine combination (weighted sum + bias: z = w·x + b), followed by a non-linear activation function (a = σ(z)).", correct: true },
+        { text: "Sorting the input vector and taking the median.", correct: false },
+        { text: "Computing the Euclidean distance between weights and inputs only.", correct: false },
+        { text: "A Fourier transform followed by singular value decomposition.", correct: false }
+      ],
+      explanation: "Exactly! An artificial neuron performs two transparent steps: linear projection (dot product plus bias) and non-linear thresholding / squashing.",
+      hint: "Weighted sum plus bias, passed through an activation."
+    },
+    {
+      id: '10-b3',
+      difficulty: 'basic',
+      question: "Why can't a multi-layer neural network with ONLY linear activation functions (f(x) = x) learn non-linear decision boundaries, no matter how deep it is?",
+      options: [
+        { text: "Because the composition of linear transformations is strictly linear, collapsing all layers into a single equivalent matrix multiplication.", correct: true },
+        { text: "Because linear layers cause division by zero during backpropagation.", correct: false },
+        { text: "Because GPU hardware cannot execute floating-point additions.", correct: false },
+        { text: "Because weights automatically set themselves to zero.", correct: false }
+      ],
+      explanation: "Precisely! W2(W1 x + b1) + b2 = (W2 W1)x + (W2 b1 + b2). Without non-linear activations between layers, 100 linear layers are mathematically equivalent to 1 single layer!",
+      hint: "What happens algebraically when you multiply matrices together?"
+    },
+    {
+      id: '10-b4',
+      difficulty: 'basic',
+      question: "In gradient descent, why do we update weights by SUBTRACTING the gradient (w ← w - η ∇L) instead of adding it?",
+      options: [
+        { text: "The gradient points in the direction of steepest loss ascent; subtracting it steps downhill toward the loss minimum.", correct: true },
+        { text: "Addition is not defined on NumPy arrays.", correct: false },
+        { text: "Subtracting guarantees the loss immediately becomes zero in one step.", correct: false },
+        { text: "Because negative numbers train faster than positive numbers.", correct: false }
+      ],
+      explanation: "Correct! The gradient vector points uphill. To minimize error (descend the loss landscape), we must take a step in the negative gradient direction.",
+      hint: "Think about skiing down a foggy mountain ravine."
+    },
+    {
+      id: '10-b5',
+      difficulty: 'basic',
+      question: "What does the Universal Approximation Theorem prove regarding a simple 2-layer neural network?",
+      options: [
+        { text: "A feedforward network with a single hidden layer and non-linear activations can approximate any continuous function on a compact domain to arbitrary precision, given enough neurons.", correct: true },
+        { text: "A 2-layer network can solve any NP-hard problem in constant O(1) time.", correct: false },
+        { text: "Neural networks never overfit training data.", correct: false },
+        { text: "Two layers are always superior to a billion-parameter Transformer.", correct: false }
+      ],
+      explanation: "Spot on! George Cybenko (1989) and Kurt Hornik (1991) proved that even 1 hidden layer with non-linear squashing functions has universal representational capacity.",
+      hint: "Can a 2-layer network approximate arbitrary curves given enough hidden width?"
+    },
+    {
+      id: '10-h1',
+      difficulty: 'hard',
+      question: "When using Binary Cross-Entropy loss L = -[y log ŷ + (1-y) log(1-ŷ)] with a Sigmoid output ŷ = σ(z_out), what is the simplified analytical derivative dL/dz_out?",
+      options: [
+        { text: "dL/dz_out = ŷ - y", correct: true },
+        { text: "dL/dz_out = (ŷ - y) · ŷ(1 - ŷ)", correct: false },
+        { text: "dL/dz_out = -y / ŷ", correct: false },
+        { text: "dL/dz_out = 1 / (1 + e^-z_out)", correct: false }
+      ],
+      explanation: "Brilliant! By the chain rule: dL/dŷ = (ŷ - y)/(ŷ(1-ŷ)) and dŷ/dz = ŷ(1-ŷ). When multiplied together, the ŷ(1-ŷ) terms cancel out elegantly, leaving simply dL/dz = ŷ - y!",
+      hint: "Remember the magical cancellation between BCE and Sigmoid."
+    },
+    {
+      id: '10-h2',
+      difficulty: 'hard',
+      question: "In a 2-layer MLP (x → z1 → a1 → z2 → ŷ), how is the hidden error delta1 = dL/dz1 calculated from downstream delta2 = dL/dz2?",
+      options: [
+        { text: "delta1 = (W2^T · delta2) ⊙ σ'(z1)", correct: true },
+        { text: "delta1 = delta2 / W2", correct: false },
+        { text: "delta1 = W1 · x + b1", correct: false },
+        { text: "delta1 = delta2 · a1", correct: false }
+      ],
+      explanation: "Exactly! Downstream backpressure is transmitted through the output weight matrix transposed (W2^T · delta2), then modulated element-wise by the local activation derivative σ'(z1).",
+      hint: "Transpose of connecting weights times delta2, multiplied elementwise by the activation derivative."
+    },
+    {
+      id: '10-h3',
+      difficulty: 'hard',
+      question: "If a neuron uses the standard ReLU activation a = max(0, z), what is its local derivative da/dz when pre-activation z < 0?",
+      options: [
+        { text: "0, completely blocking upstream gradient flow and causing the 'Dying ReLU' problem if it never reactivates.", correct: true },
+        { text: "1.0, allowing full gradient pass-through.", correct: false },
+        { text: "-1.0, inverting the gradient direction.", correct: false },
+        { text: "Infinity, causing an exploding gradient overflow.", correct: false }
+      ],
+      explanation: "Spot on! When z < 0, the slope of ReLU is strictly 0. If a neuron's weights shift such that z < 0 for all training data, its gradient is forever 0—it dies!",
+      hint: "What is the slope of a flat line at y = 0?"
+    },
+    {
+      id: '10-h4',
+      difficulty: 'hard',
+      question: "Why is initializing all weights to identical constant values (e.g., W = 0) catastrophic for a multi-layer neural network, but acceptable for a single perceptron?",
+      options: [
+        { text: "All hidden neurons in the layer compute identical forward activations and receive identical backward gradients, remaining perfectly symmetric forever.", correct: true },
+        { text: "Zero weights cause an immediate CPU floating-point exception.", correct: false },
+        { text: "NumPy arrays cannot be initialized with zeros.", correct: false },
+        { text: "The loss becomes negative infinity.", correct: false }
+      ],
+      explanation: "Correct! This is the Symmetry Breaking problem. If all neurons in a layer share identical weights, they will compute identical outputs and receive identical gradients, behaving as if there were only 1 neuron!",
+      hint: "What happens if every hidden neuron computes the exact same number?"
+    },
+    {
+      id: '10-h5',
+      difficulty: 'hard',
+      question: "How does the analytical gradient for the hidden layer weight W1 relates to the input vector x?",
+      options: [
+        { text: "dL/dW1 = delta1 · x^T (outer product of hidden delta and input vector).", correct: true },
+        { text: "dL/dW1 = delta1 + x", correct: false },
+        { text: "dL/dW1 = W1 / x", correct: false },
+        { text: "dL/dW1 = delta1 · W1", correct: false }
+      ],
+      explanation: "Brilliant! Since z1 = W1 x + b1, dz1/dW1 = x^T. Multiplying by delta1 = dL/dz1 gives the outer product delta1 · x^T, perfectly matching tensor dimensions (H × D_in).",
+      hint: "Outer product between the local delta vector and the layer's input."
+    },
+    {
+      id: '10-p1',
+      difficulty: 'pro',
+      question: "In the Universal Approximation Theorem proof (Cybenko 1989), what fundamental topological concept ensures that linear combinations of sigmoids are dense in C(K)?",
+      options: [
+        { text: "The Stone-Weierstrass Theorem (or Hahn-Banach extension with Riesz Representation), showing that no non-zero signed measure can integrate to zero against all sigmoidal shifts.", correct: true },
+        { text: "Fermat's Last Theorem on Diophantine equations.", correct: false },
+        { text: "The Central Limit Theorem on Gaussian distributions.", correct: false },
+        { text: "Heisenberg's Uncertainty Principle.", correct: false }
+      ],
+      explanation: "Masterful! Cybenko assumed that the subspace was not dense; by Hahn-Banach and Riesz, there exists a non-zero Radon measure μ such that ∫ σ(y·x + θ) dμ(x) = 0 for all y, θ. He then showed this implies μ = 0, a contradiction!",
+      hint: "Think functional analysis: Hahn-Banach, Riesz representation, and discriminatory measures."
+    },
+    {
+      id: '10-p2',
+      difficulty: 'pro',
+      question: "When numerically validating gradients, why is the two-sided central difference formula [L(w+ε) - L(w-ε)] / (2ε) mathematically superior to the one-sided forward difference [L(w+ε) - L(w)] / ε?",
+      options: [
+        { text: "Central difference has an O(ε^2) truncation error due to cancellation of quadratic Taylor terms, whereas forward difference has an O(ε) error.", correct: true },
+        { text: "Forward difference requires imaginary numbers.", correct: false },
+        { text: "Central difference runs twice as fast on GPU hardware.", correct: false },
+        { text: "One-sided difference is only defined for integer variables.", correct: false }
+      ],
+      explanation: "Bravo! Expanding L(w+ε) and L(w-ε) via Taylor series cancels the second-order terms L''(w)ε^2/2, leaving the leading error term as O(ε^2). With ε = 1e-5, central difference error is ~1e-10 vs 1e-5 for forward difference!",
+      hint: "Look at the Taylor series expansion around w."
+    },
+    {
+      id: '10-p3',
+      difficulty: 'pro',
+      question: "For Mean Squared Error L = 0.5(ŷ - y)^2 with Sigmoid output ŷ = σ(z), why can training stall completely if the network makes an extremely confident WRONG prediction (e.g. y = 1, but ŷ = 0.001)?",
+      options: [
+        { text: "dL/dz = (ŷ - y) · ŷ(1 - ŷ). When ŷ ≈ 0, the term ŷ(1-ŷ) ≈ 0, causing the gradient to vanish to zero despite maximum prediction error!", correct: true },
+        { text: "MSE produces infinite gradients when predictions are wrong.", correct: false },
+        { text: "The loss function becomes complex-valued.", correct: false },
+        { text: "The learning rate automatically scales down to zero.", correct: false }
+      ],
+      explanation: "Spot on! This is why BCE is preferred over MSE for classification with Sigmoid outputs: BCE cancels out the ŷ(1-ŷ) factor, guaranteeing a full gradient of (ŷ - y) = -0.999 that forcefully corrects the network!",
+      hint: "Calculate (ŷ - y) · σ'(z) when ŷ is very close to 0."
+    },
+    {
+      id: '10-p4',
+      difficulty: 'pro',
+      question: "In the 'Be The Optimizer' arena, when the loss surface exhibits a high condition number κ = λ_max / λ_min >> 1 on its Hessian matrix, what happens during vanilla manual gradient steps?",
+      options: [
+        { text: "The gradient points almost orthogonally to the true minimum, causing severe oscillations across steep canyon walls with painfully slow progress along the flat valley floor.", correct: true },
+        { text: "Weights converge to the global minimum in exactly 1 step.", correct: false },
+        { text: "The loss surface flattens into a 2D plane.", correct: false },
+        { text: "The learning rate becomes negative.", correct: false }
+      ],
+      explanation: "Exact! An ill-conditioned Hessian creates a steep ravine. The gradient is dominated by the steep direction, causing zig-zagging back and forth across walls rather than moving along the floor toward the minimum.",
+      hint: "Think about the shape of a steep ravine or canyon."
+    },
+    {
+      id: '10-p5',
+      difficulty: 'pro',
+      question: "Why does Xavier (Glorot) initialization use Var(W) = 2 / (n_in + n_out) for Tanh/Sigmoid, whereas He (Kaiming) initialization uses Var(W) = 2 / n_in for ReLU?",
+      options: [
+        { text: "ReLU zeroes out half of all activations on average (for inputs with mean 0), halving the variance at each layer; He initialization doubles the variance to compensate.", correct: true },
+        { text: "Kaiming He used a different GPU architecture than Xavier Glorot.", correct: false },
+        { text: "Tanh has twice the derivative of ReLU.", correct: false },
+        { text: "Xavier initialization was designed only for linear regression.", correct: false }
+      ],
+      explanation: "Outstanding! Under independent symmetric zero-mean inputs, ReLU(z) is 0 for half the distribution, so E[ReLU(z)^2] = 0.5 Var(z). To keep Var(a_l) = Var(a_{l-1}), He initialization sets Var(w) = 2/n_in to cancel the 0.5 factor!",
+      hint: "What fraction of activations are set to zero by ReLU on zero-mean inputs?"
+    }
   ]
 };
