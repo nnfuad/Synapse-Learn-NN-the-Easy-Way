@@ -8,7 +8,7 @@ by  @nnfuad
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://synapse-neural-explainer.vercel.app)
-[![Tests](https://img.shields.io/badge/pytest-79%20passed-10B981?logo=pytest&logoColor=white)](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/conftest.py)
+[![Tests](https://img.shields.io/badge/pytest-93%20passed-10B981?logo=pytest&logoColor=white)](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/conftest.py)
 
 Welcome to **Synapse**, an open-source, interactive, graphical learning platform designed to demystify neural networks for everyone. Whether you are a high school student with zero calculus background or a graduate researcher preparing to train modern Foundation Models, **Synapse** gives you the intuitive mental models, mathematical rigor, and production code needed to achieve true mastery.
 
@@ -90,13 +90,13 @@ Open your browser to: **`http://localhost:5173`**
 
 ## 🐍 Python & PyTorch Laboratory
 
-All 10 modules include runnable, self-contained Python scripts and companion Jupyter notebooks:
+All 11 modules include runnable, self-contained Python scripts and companion Jupyter notebooks:
 
 ```bash
 # 1. Install dependencies
 pip install -r python/requirements.txt
 
-# 2. Run the full automated verification test suite (79 tests across all 10 modules)
+# 2. Run the full automated verification test suite (93 tests across all 11 modules)
 pytest
 
 # 3. Explore any module script directly:
@@ -105,6 +105,7 @@ python3 python/module01_computational_graphs_autograd/autograd_engine.py
 python3 python/module02_optimization_and_loss_landscapes/optimizers_scratch.py
 python3 python/module06_transformers_and_attention/transformer_block_pytorch.py
 python3 python/module08_llm_reasoning_and_alignment/dpo_and_grpo_loss.py
+python3 python/module10_train_nn_by_hand/hand_neural_network.py
 
 # 4. Launch interactive Jupyter notebooks
 jupyter notebook notebooks/
@@ -112,7 +113,7 @@ jupyter notebook notebooks/
 
 ---
 
-## 🗺️ The Complete 10-Stage Zero-to-SOTA Curriculum
+## 🗺️ The Complete 11-Stage Zero-to-SOTA Curriculum
 
 | Module | Era | Historical Breakthrough | Core Physical Analogy | Interactive Visualizer | Scratch Tier | SOTA Tier |
 | :---: | :---: | :--- | :--- | :--- | :---: | :---: |
@@ -126,6 +127,7 @@ jupyter notebook notebooks/
 | **[07](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/python/module07_generative_diffusion_flow/)** | 2020–2024 | **Generative Paradigms**: DDPM Langevin Denoising & Optimal Transport Flow Matching | Dropping Ink in Water and Playing the Film in Reverse | 60 FPS Particle Simulation & Flow Vector Field | DDPM NumPy | OT-CFM Solvers |
 | **[08](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/python/module08_llm_reasoning_and_alignment/)** | 2022–2026 | **LLMs, Alignment & Reasoning**: Sparse MoE, Closed-Form DPO, Critic-Free GRPO | Socratic Debate Coach Scoring Rollouts | Live Token MoE Router & MCTS Reasoning Tree | Top-K Router | DeepSeek-V3 / R1 |
 | **[09](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/python/module09_mechanistic_interpretability/)** | 2024–2026 | **Mechanistic Interpretability**: Induction Circuits, Superposition & Sparse Autoencoders | MRI / Brain X-Ray of an Artificial Network | Induction Circuit Heatmaps & SAE Dictionary Plane | SAE Engine | Transformer Circuits |
+| **[10](file:///Volumes/LEXAR/Artificial%20Intelligence/Neural%20Networks/python/module10_train_nn_by_hand/)** | First Principles | **Train a NN by Hand & See What Happens Inside**: Glass-Box Arithmetic & Universal Approximation | Transparent Clockwork Watch & Hand-Turned Gear Train | 60 FPS Decision Canvas, Step Debugger & "Be The Optimizer" Arena | Pure NumPy By-Hand Engine | PyTorch Glass-Box Parity |
 
 ---
 
@@ -135,20 +137,21 @@ Every module is rigorously verified against reference implementations and numeri
 
 ```
 ============================= test session starts ==============================
-collected 79 items                                                             
+collected 93 items                                                             
 
-python/module00_history_and_perceptron/test_module00.py ......           [  7%]
-python/module01_computational_graphs_autograd/test_module01.py ......... [ 18%]
-python/module02_optimization_and_loss_landscapes/test_module02.py ........... [ 32%]
-python/module03_generalization_and_normalization/test_module03.py ...... [ 40%]
-python/module04_spatial_vision_and_cnns/test_module04.py .......         [ 49%]
-python/module05_sequential_processing_and_attention/test_module05.py ........ [ 59%]
-python/module06_transformers_and_attention/test_module06.py .......      [ 68%]
-python/module07_generative_diffusion_flow/test_module07.py ..........    [ 81%]
-python/module08_llm_reasoning_and_alignment/test_module08.py .........   [ 92%]
-python/module09_mechanistic_interpretability/test_module09.py ......     [100%]
+python/module00_history_and_perceptron/test_module00.py ......           [  6%]
+python/module01_computational_graphs_autograd/test_module01.py ......... [ 16%]
+python/module02_optimization_and_loss_landscapes/test_module02.py ........... [ 27%]
+python/module03_generalization_and_normalization/test_module03.py ...... [ 34%]
+python/module04_spatial_vision_and_cnns/test_module04.py .......         [ 41%]
+python/module05_sequential_processing_and_attention/test_module05.py ........ [ 50%]
+python/module06_transformers_and_attention/test_module06.py .......      [ 58%]
+python/module07_generative_diffusion_flow/test_module07.py ..........    [ 68%]
+python/module08_llm_reasoning_and_alignment/test_module08.py .........   [ 78%]
+python/module09_mechanistic_interpretability/test_module09.py ......     [ 84%]
+python/module10_train_nn_by_hand/test_module10.py ..............         [100%]
 
-============================== 79 passed in 3.87s ==============================
+============================== 93 passed in 2.79s ==============================
 ```
 
 ---
